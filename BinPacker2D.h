@@ -241,6 +241,24 @@ public:
 	BinRect GetRect()
 	{	return rect;	}
 
+	void FillVolumeVector(std::vector<BinRect> &vec)
+	{
+		if(IsLeaf())
+		{
+			if(IsFilled())
+			{
+				vec.insert(vec.end(), rect);
+				return;
+			}
+			return;
+		}
+		else
+		{
+			children[0]->FillVolumeVector(vec);
+			children[1]->FillVolumeVector(vec);
+		}
+	}
+
 	void SetSize(float w, float h)
 	{
 		this->rect.w = w;
@@ -354,16 +372,24 @@ public:
 		std::sort(volumes.begin(), volumes.end(), BinRectMoreThan);
 
 		//
-		rootNode->SetSize(volumes[0].w+100, volumes[0].h+100);
+		BinNode* n = 0;
+		rootNode->SetSize(volumes[0].w, volumes[0].h);
 		for(unsigned int i = 0; i < volumes.size(); i++)
 		{
-			rootNode->Insert(volumes[i]);
+			n = rootNode->Insert(volumes[i]);
+			volumes[i].x = n->GetRect().x;
+			volumes[i].y = n->GetRect().y;
 		}
 	}
 
-	std::vector<BinRect> GetPackedRects()
+	std::vector<BinRect> GetVolumes()
 	{
 		return volumes;
+	}
+
+	BinRect GetRootRect()
+	{
+		return rootNode->GetRect();
 	}
 private:
 	std::vector<BinRect> volumes;
