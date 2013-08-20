@@ -303,11 +303,13 @@ private:
 		{
 			children[0]->SetRect(BinRect(rect.x, rect.y, rect.w, offset));
 			children[1]->SetRect(BinRect(rect.x, rect.y+offset, rect.w, rect.h-offset));
+			rect.h = rect.h + offset;
 		}
 		else
 		{
 			children[0]->SetRect(BinRect(rect.x, rect.y, offset, rect.h));
 			children[1]->SetRect(BinRect(rect.x+offset, rect.y, rect.w-offset, rect.h));
+			rect.w = rect.w + offset;
 		}
 
 		printf("Node has been splitten.\n");
@@ -329,11 +331,13 @@ private:
 			{
 				children[1]->SetPos(0, rect.h);
 				children[1]->SetSize(rect.w, bin.h);
+				this->SetSize(rect.w, rect.h+bin.h);
 			}
 			else
 			{
 				children[1]->SetPos(rect.w, 0);
 				children[1]->SetSize(bin.w, rect.h);
+				this->SetSize(rect.w+bin.w, rect.h);
 			}
 
 			printf("-Child1 w=%f, h=%f\n", children[0]->GetRect().w, children[0]->GetRect().h);
