@@ -1,6 +1,6 @@
 BinPacker2D
 ===========
-'''c++
+'''cpp
 bp2D::BinPacker2D *binPacker = new bp2D::BinPacker2D();
 
 binPacker->AddRect(bp2D::BinRect(800, 800));
