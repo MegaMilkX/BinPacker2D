@@ -4,8 +4,16 @@
 #include <vector>
 #include <algorithm>
 
+namespace bp2D
+{
+
 #define BINPACKPARAM_POWEROFTWO 0x1
 #define BINPACKPARAM_ASS
+
+#define SORT_LONGESTSIDE
+#define SORT_SPACE
+#define SORT_WIDTH
+#define SORT_HEIGHT
 
 struct BinRect
 {
@@ -399,5 +407,7 @@ private:
 	std::vector<BinRect> volumes;
 	BinNode* rootNode;
 };
+
+}
 
 #endif
