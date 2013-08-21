@@ -10,10 +10,13 @@ namespace bp2D
 #define BINPACKPARAM_POWEROFTWO 0x1
 #define BINPACKPARAM_ASS
 
-#define SORT_LONGESTSIDE
-#define SORT_SPACE
-#define SORT_WIDTH
-#define SORT_HEIGHT
+enum SORT_METHOD
+{
+	SORT_MAXSIDE,
+	SORT_SQUARE,
+	SORT_WIDTH,
+	SORT_HEIGHT
+};
 
 struct BinRect
 {
@@ -73,6 +76,11 @@ struct BinRect
 		else
 			return h;
 	}
+
+	float GetSquare()
+	{
+		return (w*h);
+	}
 /*
 	bool operator > (BinRect br)
 	{return this->GetMaxSide() > br.GetMaxSide();}
@@ -83,11 +91,6 @@ struct BinRect
 	bool operator == (BinRect br)
 	{return this->GetMaxSide() == br.GetMaxSide();}*/
 };
-
-bool BinRectMoreThan(BinRect r0, BinRect r1)
-{
-	return r0.GetMaxSide()>r1.GetMaxSide();
-}
 
 class BinNode
 {
@@ -335,17 +338,31 @@ private:
 			children[1]->SetParent(this);
 			this->isFilled = false;
 
-			if(rect.w > rect.h)
+			bool expandDown = rect.w > rect.h;
+			if(expandDown)
+			{
+				if(bin.w > rect.w)
+					expandDown = !expandDown;
+			}
+			else
+			{
+				if(bin.h > rect.h)
+					expandDown = !expandDown;
+			}
+
+			if(expandDown)
 			{
 				children[1]->SetPos(0, rect.h);
 				children[1]->SetSize(rect.w, bin.h);
 				this->SetSize(rect.w, rect.h+bin.h);
+				printf("Expanding down.\n");
 			}
 			else
 			{
 				children[1]->SetPos(rect.w, 0);
 				children[1]->SetSize(bin.w, rect.h);
 				this->SetSize(rect.w+bin.w, rect.h);
+				printf("Expanding right.\n");
 			}
 
 			printf("-Child1 w=%f, h=%f\n", children[0]->GetRect().w, children[0]->GetRect().h);
@@ -357,6 +374,15 @@ private:
 			return false;
 	}
 };
+
+bool BinRectCompareMaxSide(BinRect r0, BinRect r1)
+{return r0.GetMaxSide()>r1.GetMaxSide();}
+bool BinRectCompareWidth(BinRect r0, BinRect r1)
+{return r0.w>r1.w;}
+bool BinRectCompareHeight(BinRect r0, BinRect r1)
+{return r0.h>r1.h;}
+bool BinRectCompareSquare(BinRect r0, BinRect r1)
+{return r0.GetSquare()>r1.GetSquare();}
 
 class BinPacker2D
 {
@@ -376,13 +402,29 @@ public:
 		volumes.insert(volumes.end(), bin);
 	}
 
-	void Pack(int packingFlags)
+	void Pack(int packingFlags = 0, SORT_METHOD sm = SORT_MAXSIDE)
 	{
 		if((packingFlags & BINPACKPARAM_POWEROFTWO) == BINPACKPARAM_POWEROFTWO){}
 	
-		//Sorting from largest to smallest rect (comparing by the largest side)
-		std::sort(volumes.begin(), volumes.end(), BinRectMoreThan);
-
+		switch(sm)
+		{
+		case SORT_MAXSIDE:
+			//Sorting from largest to smallest rect (comparing by the largest side)
+			std::sort(volumes.begin(), volumes.end(), BinRectCompareMaxSide);
+			break;
+		case SORT_WIDTH:
+			std::sort(volumes.begin(), volumes.end(), BinRectCompareWidth);
+			break;
+		case SORT_HEIGHT:
+			std::sort(volumes.begin(), volumes.end(), BinRectCompareHeight);
+			break;
+		case SORT_SQUARE:
+			std::sort(volumes.begin(), volumes.end(), BinRectCompareSquare);
+			break;
+		default:
+			std::sort(volumes.begin(), volumes.end(), BinRectCompareMaxSide);
+			break;
+		}
 		//
 		BinNode* n = 0;
 		rootNode->SetSize(volumes[0].w, volumes[0].h);
@@ -391,6 +433,27 @@ public:
 			n = rootNode->Insert(volumes[i]);
 			volumes[i].x = n->GetRect().x;
 			volumes[i].y = n->GetRect().y;
+		}
+
+		if(packingFlags & BINPACKPARAM_POWEROFTWO)
+		{
+			unsigned int pot_w = rootNode->GetRect().w;
+			unsigned int pot_h = rootNode->GetRect().h;
+			pot_w--;
+			pot_w |= pot_w >> 1;
+			pot_w |= pot_w >> 2;
+			pot_w |= pot_w >> 4;
+			pot_w |= pot_w >> 8;
+			pot_w |= pot_w >> 16;
+			pot_w++;
+			pot_h--;
+			pot_h |= pot_h >> 1;
+			pot_h |= pot_h >> 2;
+			pot_h |= pot_h >> 4;
+			pot_h |= pot_h >> 8;
+			pot_h |= pot_h >> 16;
+			pot_h++;
+			rootNode->SetRect(BinRect(rootNode->GetRect().id, rootNode->GetRect().x, rootNode->GetRect().y, pot_w, pot_h));
 		}
 	}
 
