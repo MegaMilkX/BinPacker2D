@@ -125,13 +125,13 @@ public:
 
 		if(bn)
 		{
-			printf("!!!Found fitting leaf node. Putting it in.\n");
+			//!!!Found fitting leaf node. Putting it in.
 			bn->Fit(bin);
 			
 		}
 		else
 		{
-			printf("Couldn't fit even after _expand(). There's something wrong with your code.\n");
+			//Couldn't fit even after _expand(). There's something wrong with your code.
 		}
 
 		return bn;
@@ -172,18 +172,10 @@ public:
 			//Fits perfectly
 			this->rect.id = bin.id;
 			this->isFilled = true;
-			printf("\n");
-			printf("Fit.\n");
-			printf("-BinNode w=%f, h=%f\n", rect.w, rect.h);
-			printf("-Bin w=%f, h=%f\n", bin.w, bin.h);
-			printf("\n");
 			return this;
 		}
 		else if(rect.w >= bin.w && rect.h >= bin.h)
 		{
-			printf("This size w=%f, h=%f\n", rect.w, rect.h);
-			printf("Bin size w=%f, h=%f\n", bin.w, bin.h);
-
 			//Volume is larger than passed rect
 			if((rect.w-bin.w) > (rect.h-bin.h))
 			{
@@ -204,7 +196,7 @@ public:
 		}
 		else
 		{
-			printf("Doesn't fit.\n");
+			//Doesn't fit.
 			return 0;
 		}
 	}
@@ -323,7 +315,7 @@ private:
 			rect.w = rect.w + offset;
 		}
 
-		printf("Node has been splitten.\n");
+		//Node has been splitten.
 	}	
 
 	//Copy all node content to the first child, create second and fit rect inside
@@ -355,19 +347,16 @@ private:
 				children[1]->SetPos(0, rect.h);
 				children[1]->SetSize(rect.w, bin.h);
 				this->SetSize(rect.w, rect.h+bin.h);
-				printf("Expanding down.\n");
+				//Expanding down.
 			}
 			else
 			{
 				children[1]->SetPos(rect.w, 0);
 				children[1]->SetSize(bin.w, rect.h);
 				this->SetSize(rect.w+bin.w, rect.h);
-				printf("Expanding right.\n");
+				//Expanding right.
 			}
-
-			printf("-Child1 w=%f, h=%f\n", children[0]->GetRect().w, children[0]->GetRect().h);
-			printf("-Bin w=%f, h=%f\n", bin.w, bin.h);
-			printf("Expand is done.\n");
+			//Expand is done.
 			return true;
 		}
 		else
